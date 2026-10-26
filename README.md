@@ -59,3 +59,21 @@ Studio Sole begint met € 26.000 activa. Na de 18 werkelijke gebeurtenissen:
 | Eindbalanstotaal aan beide zijden | € 35.085,00 |
 
 De afzonderlijke verwachte cijfers geven € 4.900 winst en € 16.890 eindbank. De leerlingen verwerken de afwijkingen en stellen daarna de gerealiseerde overzichten op.
+
+## Publiceren via GitHub Pages
+
+De broncode staat op `main`. Alleen de gebouwde statische website wordt naar `gh-pages` gepubliceerd:
+
+```bash
+bash scripts/publish-pages.sh
+```
+
+Het script test en bouwt eerst, gebruikt een afzonderlijke tijdelijke Git-index, behoudt de broncheckout en pusht zonder force. De originele bron-PDF’s worden niet meegenomen.
+
+Selecteer eenmalig in de GitHub-repository **Settings → Pages → Build and deployment**:
+
+- Source: **Deploy from a branch**
+- Branch: **gh-pages**
+- Folder: **/ (root)**
+
+Sla dit op. GitHub toont de website-URL zodra de Pages-publicatie voltooid is. Het activeren van deze repository-instelling via de API is in de huidige cloudomgeving geblokkeerd doordat `api.github.com` niet op de netwerkallowlist staat.

@@ -31,6 +31,6 @@
 
 - Actuele OSSAcademie-videolinks zijn niet geverifieerd. Het inhoudsbestand bevat een plek per leerdoel; de component ondersteunt echte HTTPS-links, YouTube-embeds en controlevragen zodra gecontroleerde gegevens zijn toegevoegd. Er zijn nog geen concrete gekoppelde video’s of bijbehorende videospecifieke vragen.
 - De website is niet online gepubliceerd en de cloudconfiguratie is nog niet gepubliceerd. Een werkende huidige instantie is geen bewijs van herstel in een nieuwe taak.
-- De code staat in de bestaande checkout; er is niets naar GitHub gepusht.
+- De broncode wordt gepubliceerd op main en de statische build op gh-pages. De GitHub Pages-instelling moet eenmalig op gh-pages / (root) staan; API-toegang voor automatische activering is in deze omgeving geblokkeerd.
 - Korte tekstvelden herkennen gedefinieerde equivalente begrippen, geen willekeurige open betogen. Beheersingslabels zijn didactische signalen, geen gevalideerde leerlingmeting.
 - Een statische website beveiligt antwoordmodellen niet. Gebruik de toets formatief. De lokale docentwerkplaats verwerkt eigen oefeningen; een afzonderlijke beveiligde/lokale verwerker voor beschermde uitgeversantwoorden is niet gebouwd en is voor deze parallelopgaven niet nodig.
