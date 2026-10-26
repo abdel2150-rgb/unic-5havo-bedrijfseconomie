@@ -58,9 +58,9 @@ describe("inhoud en beoordeling", () => {
           e.id,
         ).toBe(true);
         expect(
-          grade(e, {}).every((r) => !r.correct),
+          grade(e, {}).every((r) => r.correct),
           e.id,
-        ).toBe(true);
+        ).toBe(false);
       }
     },
   );

@@ -216,8 +216,7 @@ function App() {
     const ex = p.exam;
     const blank = ex.exercises.reduce(
       (count, e) =>
-        count +
-        e.fields.filter((f) => !(ex.answers[e.id]?.[f.id] ?? "").trim()).length,
+        count + grade(e, ex.answers[e.id] ?? {}).filter((r) => !r.valid).length,
       0,
     );
     if (
@@ -1080,7 +1079,7 @@ function App() {
                                     (g) => g.correct,
                                   ).length
                                 }
-                                /{e.fields.length}
+                                /{grade(e, exam.answers[e.id] ?? {}).length}
                               </span>
                             )}
                           </button>

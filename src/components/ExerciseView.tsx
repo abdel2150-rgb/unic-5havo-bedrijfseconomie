@@ -13,6 +13,8 @@ import { grade, normalize } from "../lib/exercises";
 import { euro, parseMoney } from "../lib/money";
 import { mistake } from "../content/mistakes";
 import { SortTrainer } from "./SortTrainer";
+import { BalanceSheet } from "./BalanceSheet";
+import { getBalanceFields, getBalanceMode } from "../lib/balance-exercise";
 export function Repair({ id }: { id: string }) {
   const m = mistake(id);
   const [answer, setAnswer] = useState("");
@@ -83,7 +85,11 @@ export function ExerciseView({
   const [invalid, setInvalid] = useState(false);
   const [repair, setRepair] = useState<string | null>(null);
   const hints = Number(answers._hints ?? 0);
+  const balanceMode = getBalanceMode(exercise);
+  const balanceIds = new Set(getBalanceFields(exercise).map((f) => f.id));
+  const regularFields = exercise.fields.filter((f) => !balanceIds.has(f.id));
   const shown = review ? grade(exercise, answers) : results;
+  const total = (shown ?? grade(exercise, answers)).length;
   const correct = shown?.filter((r) => r.correct).length ?? 0;
   const edit = (id: string, value: string) => {
     onChange(id, value);
@@ -99,7 +105,10 @@ export function ExerciseView({
   );
   function check() {
     const r = grade(exercise, answers);
-    if (r.some((x) => !x.valid)) {
+    if (
+      r.some((x) => !x.valid) ||
+      (balanceMode && exercise.fields.every((f) => !answers[f.id]?.trim()))
+    ) {
       setInvalid(true);
       return;
     }
@@ -123,7 +132,7 @@ export function ExerciseView({
         </span>
         <span className="small muted">
           {"●".repeat(exercise.level)}
-          {"○".repeat(3 - exercise.level)} · {exercise.fields.length} punten
+          {"○".repeat(3 - exercise.level)} · {total} punten
         </span>
       </div>
       <h2>{exercise.title}</h2>
@@ -168,104 +177,133 @@ export function ExerciseView({
           if (!exam) check();
         }}
       >
-        <div
-          className={
-            "answer-table " + (exercise.kind === "radar" ? "radar-table" : "")
-          }
-        >
-          <div className="table-heading">
-            <span>
-              {exercise.kind === "radar" ? "Balanspost / effect" : "Onderdeel"}
-            </span>
-            <span>Jouw antwoord</span>
-          </div>
-          {exercise.fields.map((f, i) => {
-            const result = shown?.find((r) => r.field === f.id);
-            const fid = `${exercise.id}-${f.id}`;
-            return (
-              <div
-                className={
-                  "answer-row " +
-                  (result
-                    ? result.correct
-                      ? "is-correct"
-                      : "is-incorrect"
-                    : "")
-                }
-                key={f.id}
-              >
-                <label htmlFor={fid}>{f.label}</label>
-                <div className="answer-control">
-                  {f.kind === "choice" ? (
-                    <select
-                      id={fid}
-                      disabled={review}
-                      value={answers[f.id] ?? ""}
-                      onChange={(e) => edit(f.id, e.target.value)}
-                      aria-invalid={
-                        result ? !result.correct : invalid && !answers[f.id]
-                      }
-                    >
-                      <option value="">Kies…</option>
-                      {f.options?.map((o) => (
-                        <option key={o}>{o}</option>
-                      ))}
-                    </select>
-                  ) : (
-                    <div className="money-input">
-                      {f.kind === "money" && <span aria-hidden="true">€</span>}
-                      <input
+        {balanceMode && (
+          <BalanceSheet
+            exercise={exercise}
+            answers={answers}
+            results={shown}
+            onChange={edit}
+            review={review}
+            invalid={invalid}
+          />
+        )}
+        {exercise.kind === "radar" && (
+          <p className="small muted">
+            Bij ontvangsten, opbrengsten, kosten, uitgaven en resultaat telt een
+            leeg bedrag als nul. Vul alleen een bedrag in als er een effect is.
+          </p>
+        )}
+        {regularFields.length > 0 && (
+          <div
+            className={
+              "answer-table " + (exercise.kind === "radar" ? "radar-table" : "")
+            }
+          >
+            <div className="table-heading">
+              <span>
+                {exercise.kind === "radar"
+                  ? "Balanspost / effect"
+                  : "Onderdeel"}
+              </span>
+              <span>Jouw antwoord</span>
+            </div>
+            {regularFields.map((f, i) => {
+              const result = shown?.find((r) => r.field === f.id);
+              const fid = `${exercise.id}-${f.id}`;
+              return (
+                <div
+                  className={
+                    "answer-row " +
+                    (result
+                      ? result.correct
+                        ? "is-correct"
+                        : "is-incorrect"
+                      : "")
+                  }
+                  key={f.id}
+                >
+                  <label htmlFor={fid}>{f.label}</label>
+                  <div className="answer-control">
+                    {f.kind === "choice" ? (
+                      <select
                         id={fid}
-                        autoComplete="off"
-                        type="text"
-                        inputMode={f.kind === "money" ? "decimal" : "text"}
-                        placeholder={
-                          f.kind === "money" ? "0,00" : "Jouw antwoord"
-                        }
+                        disabled={review}
                         value={answers[f.id] ?? ""}
                         onChange={(e) => edit(f.id, e.target.value)}
-                        disabled={review}
                         aria-invalid={
-                          result
-                            ? !result.correct
-                            : invalid &&
-                              (!answers[f.id] ||
-                                (f.kind === "money" &&
-                                  parseMoney(answers[f.id]) === null))
+                          result ? !result.correct : invalid && !answers[f.id]
                         }
-                      />
-                    </div>
-                  )}
-                  {result && (
-                    <span className="field-feedback">
-                      {result.correct ? (
-                        <>
-                          <Check size={14} /> Goed
-                        </>
-                      ) : (
-                        <>
-                          <span>
-                            {result.errorKind === "begrip"
-                              ? "Begripsfout"
-                              : "Reken- of invoerfout"}{" "}
-                            · Correct:{" "}
-                            {typeof f.answer === "number"
-                              ? euro(f.answer)
-                              : f.answer}
-                          </span>
-                        </>
-                      )}
-                    </span>
-                  )}
+                      >
+                        <option value="">Kies…</option>
+                        {f.options?.map((o) => (
+                          <option key={o}>{o}</option>
+                        ))}
+                      </select>
+                    ) : (
+                      <div className="money-input">
+                        {f.kind === "money" && (
+                          <span aria-hidden="true">€</span>
+                        )}
+                        <input
+                          id={fid}
+                          autoComplete="off"
+                          type="text"
+                          inputMode={f.kind === "money" ? "decimal" : "text"}
+                          placeholder={
+                            f.kind === "money"
+                              ? exercise.kind === "radar"
+                                ? "—"
+                                : "0,00"
+                              : "Jouw antwoord"
+                          }
+                          value={answers[f.id] ?? ""}
+                          onChange={(e) => edit(f.id, e.target.value)}
+                          disabled={review}
+                          aria-invalid={
+                            result
+                              ? !result.correct
+                              : invalid &&
+                                (!answers[f.id] ||
+                                  (f.kind === "money" &&
+                                    parseMoney(answers[f.id]) === null))
+                          }
+                        />
+                      </div>
+                    )}
+                    {result && (
+                      <span className="field-feedback">
+                        {result.correct ? (
+                          <>
+                            <Check size={14} /> Goed
+                          </>
+                        ) : (
+                          <>
+                            <span>
+                              {result.errorKind === "begrip"
+                                ? "Begripsfout"
+                                : "Reken- of invoerfout"}{" "}
+                              · Correct:{" "}
+                              {typeof f.answer === "number"
+                                ? euro(f.answer)
+                                : f.answer}
+                            </span>
+                          </>
+                        )}
+                      </span>
+                    )}
+                  </div>
                 </div>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        )}
         {invalid && (
           <p className="error" role="alert">
-            Vul alle antwoorden in. Gebruik voor bedragen de Nederlandse
-            notatie, bijvoorbeeld 1.250,50. Vul 0 in als er geen effect is.
+            {balanceMode
+              ? balanceMode === "mutation"
+                ? "Vul een geldig bedrag in bij elke toegevoegde post. Voeg geen ongewijzigde posten toe. Gebruik bijvoorbeeld 1.250,50."
+                : "Vul de balansbedragen in. Nulsaldi mag je leeg laten. Gebruik voor bedragen de Nederlandse notatie, bijvoorbeeld 1.250,50."
+              : "Vul alle antwoorden in. Gebruik voor bedragen de Nederlandse notatie, bijvoorbeeld 1.250,50."}
           </p>
         )}
         {!exam && !review && (
@@ -297,25 +335,18 @@ export function ExerciseView({
       )}
       {shown && (
         <div
-          className={
-            "feedback " +
-            (correct === exercise.fields.length ? "success" : "retry")
-          }
+          className={"feedback " + (correct === total ? "success" : "retry")}
           role="status"
         >
           <div className="feedback-title">
-            {correct === exercise.fields.length ? (
-              <CheckCircle2 />
-            ) : (
-              <AlertCircle />
-            )}
+            {correct === total ? <CheckCircle2 /> : <AlertCircle />}
             <h3>
-              {correct === exercise.fields.length
+              {correct === total
                 ? "Dit klopt. Goed geredeneerd!"
                 : "Kijk nog eens naar het verschil."}
             </h3>
             <b>
-              {correct}/{exercise.fields.length}
+              {correct}/{total}
             </b>
           </div>
           <p>{exercise.explanation}</p>
@@ -343,7 +374,7 @@ export function ExerciseView({
               })}
             </div>
           )}
-          {correct < exercise.fields.length && (
+          {correct < total && (
             <p className="small">
               Een verkeerd bedrag kan een rekenfout zijn. De volgende begrippen
               helpen je controleren of de redenering ook klopt.
@@ -361,7 +392,7 @@ export function ExerciseView({
           ))}
           {repair && <Repair id={repair} />}
           <div className="exercise-actions">
-            {!review && correct < exercise.fields.length && (
+            {!review && correct < total && (
               <button
                 className="button secondary"
                 onClick={() => setResults(null)}

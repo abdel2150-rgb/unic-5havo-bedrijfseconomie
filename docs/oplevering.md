@@ -20,7 +20,7 @@
 ## Verificatie
 
 - Herhaalbare installatie met `npm ci --cache /workspace/.npm-cache --no-audit --no-fund` geslaagd.
-- 63 unit- en inhoudstests geslaagd. Hierbij zijn alle transactietypen, btw, periodetoerekening, leningen/afronding, afschrijving, volledige casuseindstanden, 44 opgaven in meerdere varianten, beoordelingslogica en imports gecontroleerd.
+- 74 unit- en inhoudstests geslaagd. Hierbij zijn alle transactietypen, btw, periodetoerekening, leningen/afronding, afschrijving, volledige casuseindstanden, 44 opgaven in meerdere varianten, beoordelingslogica en imports gecontroleerd.
 - Zes browserworkflows samen geslaagd: dashboard, hints en lokale opslag; classificatie en herstel; oefentoets en tweede tabblad; docentimport en export; volledige simulatie; mobiele lay-out en bronnen/theorie.
 - De aanvullende zevende browserworkflow voor een opgave toevoegen via het docentformulier is na correctie van de toegankelijke selectnamen afzonderlijk geslaagd.
 - TypeScript en Vite-productiebuild geslaagd.
@@ -30,7 +30,13 @@
 ## Nog open en grenzen
 
 - Actuele OSSAcademie-videolinks zijn niet geverifieerd. Het inhoudsbestand bevat een plek per leerdoel; de component ondersteunt echte HTTPS-links, YouTube-embeds en controlevragen zodra gecontroleerde gegevens zijn toegevoegd. Er zijn nog geen concrete gekoppelde video’s of bijbehorende videospecifieke vragen.
-- De website is niet online gepubliceerd en de cloudconfiguratie is nog niet gepubliceerd. Een werkende huidige instantie is geen bewijs van herstel in een nieuwe taak.
+- De broncode en statische websitebestanden zijn naar GitHub gestuurd. De live bereikbaarheid van GitHub Pages kan vanuit deze omgeving niet worden geverifieerd. De cloudconfiguratie moet afzonderlijk worden gepubliceerd; een werkende huidige instantie is geen bewijs van herstel in een nieuwe taak.
 - De broncode wordt gepubliceerd op main en de statische build op gh-pages. De GitHub Pages-instelling moet eenmalig op gh-pages / (root) staan; API-toegang voor automatische activering is in deze omgeving geblokkeerd.
 - Korte tekstvelden herkennen gedefinieerde equivalente begrippen, geen willekeurige open betogen. Beheersingslabels zijn didactische signalen, geen gevalideerde leerlingmeting.
 - Een statische website beveiligt antwoordmodellen niet. Gebruik de toets formatief. De lokale docentwerkplaats verwerkt eigen oefeningen; een afzonderlijke beveiligde/lokale verwerker voor beschermde uitgeversantwoorden is niet gebouwd en is voor deze parallelopgaven niet nodig.
+
+## Balansen in T-vorm
+
+Beginbalansen, eindbalansen en mutatiebalansen hebben activa/debet links en passiva/credit rechts. De leerling voegt bij mutatiebalansen alleen veranderde posten toe. Ontbrekende noodzakelijke posten en onterecht toegevoegde posten blijven fout; lege ongewijzigde posten leveren geen punten op. In volledige balansen en bij de aanvullende effecten van de transactieradar telt een leeg bedrag als nul. De totalen volgen uitsluitend uit de eigen invoer.
+
+Alle negen browserworkflows zijn samen geslaagd, inclusief twee regressietests voor selectie/verwijderen/ontbrekende mutaties en een T-beginbalans met lege nulsaldi en opgeslagen invoer. De nieuwe T-balans is daarnaast op mobiele breedte gecontroleerd: de pagina loopt niet buiten beeld; de balans kan zo nodig binnen zijn eigen kader horizontaal scrollen.

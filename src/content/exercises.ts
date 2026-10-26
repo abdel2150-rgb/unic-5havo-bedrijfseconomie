@@ -184,7 +184,7 @@ const radar = (
     title,
     ["mutaties", "geldstromen", ...focus],
     description +
-      " Vul alle mutaties in, met minteken bij afname. Geen verandering? Vul 0 in.",
+      " Voeg alleen de balansposten toe die veranderen. Noteer de mutaties met een minteken bij een afname.",
     [
       ...mutationFields(p.delta),
       M("receipt", "Ontvangst", p.receipts, "credit-cash"),
@@ -293,7 +293,7 @@ export function exercises(variant = 1): Exercise[] {
       "opening",
       "Bouw de hele beginbalans",
       ["balans", "investeren", "financieren"],
-      `Zet deze gegevens in de beginbalans: inventaris ${euro(start.equipment)}, voorraad ${euro(start.inventory)}, btw-vordering ${euro(start.vatIn)}, bank ${euro(start.bank)}, eigen inbreng ${euro(start.equity)}, lening vijf jaar ${euro(start.loan)}. Alle overige posten zijn nul.`,
+      `Zet deze gegevens in de beginbalans: inventaris ${euro(start.equipment)}, voorraad ${euro(start.inventory)}, btw-vordering ${euro(start.vatIn)}, bank ${euro(start.bank)}, eigen inbreng ${euro(start.equity)}, lening vijf jaar ${euro(start.loan)}. Laat posten zonder bedrag leeg.`,
       balanceFields(start),
       "Activa en passiva zijn beide gelijk aan de totale financiering. Btw is een aparte vordering.",
       "Tel de activa op en controleer: totaal activa = eigen vermogen + schulden.",
@@ -908,8 +908,7 @@ export function exercises(variant = 1): Exercise[] {
       "ending",
       "Stel de eindbalans op",
       ["eindbalans", "balans"],
-      common +
-        " Vul alle eindstanden in; ongewijzigde en lege posten moeten ook ingevuld worden.",
+      common + " Vul de eindstanden in. Posten zonder saldo mag je leeg laten.",
       balanceFields(end),
       "Elke eindstand volgt uit beginstand plus mutaties. EV stijgt met winst en daalt met de privé-opname.",
       "Controleer alle activa en passiva afzonderlijk; gebruik resultaat voor de mutatie in EV.",
@@ -930,7 +929,7 @@ export function exercises(variant = 1): Exercise[] {
       "De integrale mutatiebalans",
       ["mutaties", "eindbalans"],
       common +
-        " Noteer de totale mutatie per post, niet de eindstand. Vul 0 bij geen verandering.",
+        " Noteer de totale mutatie per post, niet de eindstand. Laat posten zonder verandering weg.",
       mutationFields(delta),
       "De mutatie in eigen vermogen bestaat uit resultaat minus privé-opname. Beide zijden van de mutatiebalans hebben hetzelfde saldo.",
       "Mutatie = eindstand − beginstand.",
@@ -1199,7 +1198,7 @@ export const simulationExercises: Exercise[] = [
       "delta",
       "9 · Integrale mutatiebalans",
       ["mutaties"],
-      "Noteer voor alle posten de totale werkelijke mutatie over januari. Geen verandering: 0.",
+      "Noteer voor alle posten de totale werkelijke mutatie over januari. Laat posten zonder verandering weg.",
       mutationFields(
         Object.fromEntries(
           Object.keys(opening).map((k) => [

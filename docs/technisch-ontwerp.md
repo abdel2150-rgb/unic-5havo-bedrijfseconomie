@@ -19,3 +19,7 @@ Beheersing vraagt verschillende opgaven en voor het hoogste niveau ook verschill
 ## Bronnen en docenttool
 
 46 bronverwijzingen in het register; eigen parallelopgaven, geen beschermde PDF’s in de applicatie. Het beheerscherm bewaart imports uitsluitend lokaal op dit apparaat. JSON ondersteunt meerdere velden en tekstalternatieven. CSV ondersteunt eenvoudige één-bedragopgaven. Antwoorden in openbare statische assets zijn altijd uitleesbaar. Importeer geen beschermde antwoordmodellen voor openbaar verspreiden; voor beschermde verwerking is een afzonderlijke lokale docenttool nodig. Die tool is niet onderdeel van deze release.
+
+## Balanswerkruimte
+
+De T-balans gebruikt dezelfde financiële velden en rekenmotor als de eerdere invoertabel. De gekozen mutatieposten worden samen met de antwoorden in IndexedDB bewaard. Eerdere opgeslagen toetsen en conceptantwoorden worden aan de bestaande post-id’s en veldnamen herkend; oude expliciete nullen blijven bruikbaar en hoeven niet opnieuw te worden ingevoerd. Een niet-gekozen post betekent geen mutatie. De beoordeling controleert alle vereiste mutaties en rekent onterecht toegevoegde posten ook fout, zelfs als ze met bedrag nul zijn ingevuld. Alleen de zichtbaar gekozen posten staan vóór controle in beeld; ontbrekende noodzakelijke posten verschijnen pas bij de feedback.

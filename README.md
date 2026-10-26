@@ -77,3 +77,7 @@ Selecteer eenmalig in de GitHub-repository **Settings → Pages → Build and de
 - Folder: **/ (root)**
 
 Sla dit op. GitHub toont de website-URL zodra de Pages-publicatie voltooid is. Het activeren van deze repository-instelling via de API is in de huidige cloudomgeving geblokkeerd doordat `api.github.com` niet op de netwerkallowlist staat.
+
+### Balansen invullen
+
+Begin- en eindbalansen en mutatiebalansen staan in T-vorm: activa/debet links en passiva/credit rechts. Bij mutatiebalansen voeg je alleen de veranderde posten toe en vul je hun mutatie in, met een minteken bij een afname. Je hoeft geen ongewijzigde posten of nullen in te vullen. Weglaten van een benodigde post blijft een fout; onterecht toegevoegde posten tellen ook als fout. Totalen zijn gebaseerd op de eigen invoer. In volledige balansen tellen lege bedragen als nulsaldo. Ook de aanvullende geld- en resultaateffecten in de transactieradar mogen leeg blijven als er geen effect is. Eerdere opgeslagen antwoorden blijven bruikbaar.

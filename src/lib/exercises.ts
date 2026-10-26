@@ -1,4 +1,9 @@
 import { parseMoney } from "./money";
+import {
+  getBalanceFields,
+  getBalanceMode,
+  isPostSelected,
+} from "./balance-exercise";
 export interface Field {
   id: string;
   label: string;
@@ -95,5 +100,36 @@ export function gradeField(field: Field, value: string | undefined): Grade {
     errorKind: correct ? undefined : errorKind,
   };
 }
-export const grade = (ex: Exercise, answers: Record<string, string>) =>
-  ex.fields.map((f) => gradeField(f, answers[f.id]));
+export function grade(ex: Exercise, answers: Record<string, string>): Grade[] {
+  const mode = getBalanceMode(ex);
+  const balanceIds = new Set(getBalanceFields(ex).map((f) => f.id));
+  return ex.fields.flatMap((f) => {
+    if (!balanceIds.has(f.id))
+      return [
+        gradeField(
+          f,
+          ex.kind === "radar" && f.kind === "money"
+            ? answers[f.id]?.trim() || "0"
+            : answers[f.id],
+        ),
+      ];
+    const selected = isPostSelected(f, answers);
+    if (mode === "mutation" && f.answer === 0 && !selected) return [];
+    if (mode === "mutation" && !selected) return [gradeField(f, "0")];
+    const raw = answers[f.id]?.trim() ?? "";
+    if (mode === "mutation" && selected && f.answer === 0) {
+      return [
+        {
+          field: f.id,
+          correct: false,
+          valid: raw !== "" && parseMoney(raw) !== null,
+          diagnosis: "sign",
+          errorKind: "begrip",
+        } satisfies Grade,
+      ];
+    }
+    if (mode === "mutation" && selected && raw === "")
+      return [gradeField(f, raw)];
+    return [gradeField(f, raw || "0")];
+  });
+}

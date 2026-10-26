@@ -3,6 +3,11 @@ import { exercises, simulationExercises } from "../../src/content/exercises";
 import type { Exercise } from "../../src/lib/exercises";
 import { inputMoney } from "../../src/lib/money";
 import { template } from "../../src/lib/importer";
+import {
+  getBalanceFields,
+  getBalanceMode,
+  isAssetField,
+} from "../../src/lib/balance-exercise";
 async function ready(page: Page) {
   await page.goto("/");
   await expect(
@@ -10,7 +15,18 @@ async function ready(page: Page) {
   ).toBeVisible();
 }
 async function fillExercise(page: Page, exercise: Exercise) {
+  const mode = getBalanceMode(exercise);
+  const balanceIds = new Set(getBalanceFields(exercise).map((f) => f.id));
   for (const f of exercise.fields) {
+    if (balanceIds.has(f.id) && f.answer === 0) continue;
+    if (balanceIds.has(f.id) && mode === "mutation")
+      await page
+        .getByLabel(
+          isAssetField(f)
+            ? "Post toevoegen bij activa"
+            : "Post toevoegen bij passiva",
+        )
+        .selectOption(f.id);
     const field = page.locator(`[id="${exercise.id}-${f.id}"]`);
     if (f.kind === "choice") await field.selectOption(String(f.answer));
     else
@@ -240,4 +256,71 @@ test("docent maakt een opgave met foutdiagnose via het formulier", async ({
   await expect(
     page.getByRole("button", { name: "Aflossing is geen kostenpost" }),
   ).toBeVisible();
+});
+
+test("mutatiebalans in T-vorm: alleen veranderde posten, verwijderen en ontbrekende post herkennen", async ({
+  page,
+}) => {
+  await ready(page);
+  await page.getByRole("button", { name: "3.1 De beginbalans" }).click();
+  await page.getByRole("button", { name: /07 De eerste aflossing/ }).click();
+  const sheet = page.getByRole("region", { name: "Mutatiebalans in T-vorm" });
+  await expect(sheet.getByRole("textbox")).toHaveCount(0);
+  await sheet.getByLabel("Post toevoegen bij activa").selectOption("bank");
+  await page.getByLabel("Bank · mutatie", { exact: true }).fill("-500");
+  await sheet.getByLabel("Post toevoegen bij passiva").selectOption("loan");
+  await page
+    .getByLabel("Langlopende lening · mutatie", { exact: true })
+    .fill("-500");
+  await sheet.getByLabel("Post toevoegen bij activa").selectOption("equipment");
+  await page.getByLabel("Inventaris · mutatie", { exact: true }).fill("50");
+  await sheet.getByRole("button", { name: "Inventaris verwijderen" }).click();
+  await expect(sheet.getByRole("textbox")).toHaveCount(2);
+  await page.getByLabel("Uitgave", { exact: true }).fill("500");
+  await page.getByRole("button", { name: "Controleer mijn antwoord" }).click();
+  await expect(
+    page.getByRole("heading", { name: "Dit klopt. Goed geredeneerd!" }),
+  ).toBeVisible();
+  await expect(sheet.getByLabel("Totaal activa", { exact: true })).toHaveText(
+    /500/,
+  );
+  await expect(sheet.getByLabel("Totaal passiva", { exact: true })).toHaveText(
+    /500/,
+  );
+  await page.screenshot({ path: "/tmp/unic-t-balans.png", fullPage: true });
+  await sheet
+    .getByRole("button", { name: "Langlopende lening verwijderen" })
+    .click();
+  await page.getByRole("button", { name: "Controleer mijn antwoord" }).click();
+  await expect(sheet.getByText(/Deze post ontbreekt/)).toBeVisible();
+});
+
+test("beginbalans in T-vorm met lege nulsaldi en behouden invoer na herladen", async ({
+  page,
+}) => {
+  await ready(page);
+  await page.getByRole("button", { name: "3.1 De beginbalans" }).click();
+  await page
+    .getByRole("button", { name: /04 Bouw de hele beginbalans/ })
+    .click();
+  const e = exercises().find((e) => e.id === "3.1-opening")!;
+  await fillExercise(page, e);
+  await page.getByRole("button", { name: "Controleer mijn antwoord" }).click();
+  await expect(
+    page.getByRole("heading", { name: "Dit klopt. Goed geredeneerd!" }),
+  ).toBeVisible();
+  const sheet = page.getByRole("region", { name: "Balans in T-vorm" });
+  await expect(sheet.getByLabel("Totaal activa", { exact: true })).toHaveText(
+    /26.000/,
+  );
+  await expect(page.getByLabel("Kas", { exact: true })).toHaveValue("");
+  await expect(
+    page.getByText("Op dit apparaat opgeslagen").last(),
+  ).toBeVisible();
+  await page.reload();
+  await page.getByRole("button", { name: "3.1 De beginbalans" }).click();
+  await page
+    .getByRole("button", { name: /04 Bouw de hele beginbalans/ })
+    .click();
+  await expect(page.getByLabel("Bank", { exact: true })).toHaveValue("9060,00");
 });
